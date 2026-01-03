@@ -1,0 +1,54 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+    - uses: actions/checkout@v6
+    - run: |
+        sudo apt update
+        sudo apt install -y 7zip bison build-essential flex git gnutls-dev python3-dev python3-pyelftools swig
+        # Fixes armbian builder's "Failed to update binfmts" issue
+        # https://forum.armbian.com/topic/52127-running-armbian-build-on-x86-64/
+        sudo apt install -y qemu-user-static
+        # For u-boot (armbian is built in a docker container)
+        sudo apt install gcc-aarch64-linux-gnu
+    - run: make zip
+    - run: ls -lh
+      if: always()
+    - run: git -C rk3528-tvbox log -n 1
+    - run: git -C rk3528-tvbox diff HEAD
+    - run: git -C rk3528-tvbox/armbian-build log -n 1
+    - run: git -C rk3528-tvbox/armbian-build diff HEAD
+    - run: git -C u-boot log -n 1
+    - run: git -C u-boot diff HEAD
+    - name: Upload u-boot images
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: dq08-u-boot
+        path: |
+          u-boot/idbloader.img
+          u-boot/u-boot.itb
+    - name: Upload dq08 u-boot+armbian image
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: dq08-uboot-armbian-image
+        path: rk3528-tvbox/dq08.img
+    - name: Upload recovery image
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: dq08-recovery-image
+        path: dq08_recovery_*.zip
+    - name: Upload ha-supervised images
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: dq08-ha-supervised-images
+        path: dq08_ha_supervised_*.zip
