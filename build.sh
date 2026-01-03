@@ -1,6 +1,7 @@
 #!/bin/bash
 set -x
 set -e
+
 if [ ! -e rk3528-tvbox ]; then
   git clone https://github.com/ilyakurdyukov/rk3528-tvbox.git
   git -C rk3528-tvbox checkout 1f4c5440
@@ -9,6 +10,7 @@ cd rk3528-tvbox
 git stash
 patch devicetree/orig/rk3528.dtsi < ../dt_i2c.patch
 cp ../uboot-new-gcc.patch armbian-patch/patch/u-boot/legacy/board_rk3528-tvbox
+
 if [ ! -e armbian-build ]; then
   git clone --depth=1 https://github.com/armbian/build armbian-build
 fi
@@ -29,27 +31,36 @@ mkdir -p userpatches/extensions
 # ENABLE_EXTENSIONS=ha
 ./compile.sh build BOARD=rk3528-tvbox BRANCH=legacy BUILD_DESKTOP=no BUILD_MINIMAL=yes EXPERT=yes KERNEL_CONFIGURE=no KERNEL_GIT=shallow RELEASE=bookworm PACKAGE_LIST_BOARD="i2c-tools gettext-base unzip gdisk"
 cd ../..
+
 cat <<EOF > rk3528-tvbox/build.sh
 #!/bin/bash
 set -e
 set -x
 cd /build
-IMAGE=\`ls /build/armbian-build/output/images/*.img\`
-losetup -D
-DEVICE=\`losetup -f\`
-losetup --partscan \$DEVICE \$IMAGE
-mount \${DEVICE}p1 /mnt
 cd devicetree
 cp orig/*.dtsi .
 patch -p1 -i rk3528-tvbox.patch
 make NAME=rk3528-vontar-dq08 PRESET=LINUX
-cp rk3528-vontar-dq08.dtb /mnt/dtb/rockchip
-sed "s#fdtfile=.*#fdtfile=rockchip/rk3528-vontar-dq08.dtb#" -i /mnt/armbianEnv.txt
-losetup -D
-mv /build/armbian-build/output/images/*.img /build/dq08.img
 EOF
 chmod a+x rk3528-tvbox/build.sh
-docker run -v /dev:/dev --privileged=true -v `pwd`/rk3528-tvbox:/build --rm armbian.local.only/armbian-build:initial /build/build.sh
+docker run -v `pwd`/rk3528-tvbox:/build --rm armbian.local.only/armbian-build:initial /build/build.sh
+
+cat <<EOF > rk3528-tvbox/add-dtb.sh
+#!/bin/bash
+set -e
+set -x
+IMAGE=\`ls rk3528-tvbox/armbian-build/output/images/*.img\`
+losetup -D
+DEVICE=\`losetup -f\`
+losetup --partscan \$DEVICE \$IMAGE
+mount \${DEVICE}p1 /mnt
+cp rk3528-tvbox/devicetree/rk3528-vontar-dq08.dtb /mnt/dtb/rockchip
+sed "s#fdtfile=.*#fdtfile=rockchip/rk3528-vontar-dq08.dtb#" -i /mnt/armbianEnv.txt
+losetup -D
+mv rk3528-tvbox/armbian-build/output/images/*.img rk3528-tvbox/dq08.img
+EOF
+sudo bash rk3528-tvbox/add-dtb.sh
+
 if [ ! -e u-boot ]; then
   git clone https://github.com/u-boot/u-boot
   cd u-boot
