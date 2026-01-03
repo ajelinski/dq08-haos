@@ -3,6 +3,7 @@ set -x
 set -e
 if [ ! -e rk3528-tvbox ]; then
   git clone https://github.com/ilyakurdyukov/rk3528-tvbox.git
+  git -C rk3528-tvbox checkout 1f4c5440
 fi
 cd rk3528-tvbox
 git stash
