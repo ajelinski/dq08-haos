@@ -49,7 +49,7 @@ losetup -D
 mv /build/armbian-build/output/images/*.img /build/dq08.img
 EOF
 chmod a+x rk3528-tvbox/build.sh
-docker run -it -v /dev:/dev --privileged=true -v `pwd`/rk3528-tvbox:/build --rm armbian.local.only/armbian-build:initial /build/build.sh
+docker run -v /dev:/dev --privileged=true -v `pwd`/rk3528-tvbox:/build --rm armbian.local.only/armbian-build:initial /build/build.sh
 if [ ! -e u-boot ]; then
   git clone https://github.com/u-boot/u-boot
   cd u-boot
