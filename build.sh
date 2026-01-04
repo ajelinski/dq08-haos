@@ -77,6 +77,6 @@ export ROCKCHIP_TPL=rkbin/bin/rk35/rk3528_ddr_1056MHz_4BIT_PCB_v1.10.bin
 export BL31=rkbin/bin/rk35/rk3528_bl31_v1.18.elf
 make generic-rk3528_defconfig
 patch -p1 < ../u-boot-2025-config.patch
-make -j$(nproc)
+make -j$(nproc) CROSS_COMPILE=aarch64-linux-gnu-
 dd if=idbloader.img of=../rk3528-tvbox/dq08.img conv=notrunc seek=64 bs=512
 dd if=u-boot.itb of=../rk3528-tvbox/dq08.img conv=notrunc bs=512 seek=16384
