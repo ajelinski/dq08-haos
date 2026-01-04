@@ -40,7 +40,7 @@ cd /build
 cd devicetree
 cp orig/*.dtsi .
 patch -p1 -i rk3528-tvbox.patch
-make NAME=rk3528-vontar-dq08 PRESET=LINUX
+make -j\`nproc\` NAME=rk3528-vontar-dq08 PRESET=LINUX
 EOF
 chmod a+x rk3528-tvbox/build.sh
 docker run -v `pwd`/rk3528-tvbox:/build --rm armbian.local.only/armbian-build:initial /build/build.sh
