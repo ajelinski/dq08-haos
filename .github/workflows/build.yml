@@ -16,10 +16,21 @@ jobs:
         # https://forum.armbian.com/topic/52127-running-armbian-build-on-x86-64/
         sudo apt install -y qemu-user-static
         # For u-boot (armbian is built in a docker container)
-        sudo apt install gcc-aarch64-linux-gnu
-    - run: make zip
-    - run: ls -lh
+        sudo apt install -y gcc-aarch64-linux-gnu
+#    - run: make zip
+    - run: make img
+    - run: |
+        df -h
+        ls -lh
       if: always()
+    - run: |
+        sudo apt install -y tree
+        tree --du >tree.txt
+    - name: Upload tree
+      uses: actions/upload-artifact@v6
+      with:
+        name: tree
+        path: tree.txt
     - run: git -C rk3528-tvbox log -n 1
     - run: git -C rk3528-tvbox diff HEAD
     - run: git -C rk3528-tvbox/armbian-build log -n 1
@@ -40,15 +51,15 @@ jobs:
       with:
         name: dq08-uboot-armbian-image
         path: rk3528-tvbox/dq08.img
-    - name: Upload recovery image
-      uses: actions/upload-artifact@v6
-      if: always()
-      with:
-        name: dq08-recovery-image
-        path: dq08_recovery_*.zip
-    - name: Upload ha-supervised images
-      uses: actions/upload-artifact@v6
-      if: always()
-      with:
-        name: dq08-ha-supervised-images
-        path: dq08_ha_supervised_*.zip
+#    - name: Upload recovery image
+#      uses: actions/upload-artifact@v6
+#      if: always()
+#      with:
+#        name: dq08-recovery-image
+#        path: dq08_recovery_*.zip
+#    - name: Upload ha-supervised images
+#      uses: actions/upload-artifact@v6
+#      if: always()
+#      with:
+#        name: dq08-ha-supervised-images
+#        path: dq08_ha_supervised_*.zip
