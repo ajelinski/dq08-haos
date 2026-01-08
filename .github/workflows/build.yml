@@ -17,7 +17,6 @@ jobs:
         sudo apt install -y qemu-user-static
         # For u-boot (armbian is built in a docker container)
         sudo apt install -y gcc-aarch64-linux-gnu
-#    - run: make zip
     - run: make img
     - run: |
         df -h
@@ -51,15 +50,24 @@ jobs:
       with:
         name: dq08-uboot-armbian-image
         path: rk3528-tvbox/dq08.img
-#    - name: Upload recovery image
-#      uses: actions/upload-artifact@v6
-#      if: always()
-#      with:
-#        name: dq08-recovery-image
-#        path: dq08_recovery_*.zip
-#    - name: Upload ha-supervised images
-#      uses: actions/upload-artifact@v6
-#      if: always()
-#      with:
-#        name: dq08-ha-supervised-images
-#        path: dq08_ha_supervised_*.zip
+    # These files won't be needed any longer
+    - name: Clean disk
+      run: |
+        df -h
+        rm -rf rk3528-tvbox/armbian-build
+        df -h
+        docker system prune -af --volumes
+        df -h
+    - run: make zip
+    - name: Upload recovery image
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: dq08-recovery-image
+        path: dq08_recovery_*.zip
+    - name: Upload ha-supervised images
+      uses: actions/upload-artifact@v6
+      if: always()
+      with:
+        name: dq08-ha-supervised-images
+        path: dq08_ha_supervised_*.zip
