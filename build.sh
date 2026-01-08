@@ -51,13 +51,13 @@ cat <<EOF > rk3528-tvbox/add-dtb.sh
 set -e
 set -x
 IMAGE=\`ls rk3528-tvbox/armbian-build/output/images/*.img\`
-losetup -D
 DEVICE=\`losetup -f\`
-losetup --partscan \$DEVICE \$IMAGE
+losetup --direct-io --partscan \$DEVICE \$IMAGE
 mount \${DEVICE}p1 /mnt
 cp rk3528-tvbox/devicetree/rk3528-vontar-dq08.dtb /mnt/dtb/rockchip
 sed "s#fdtfile=.*#fdtfile=rockchip/rk3528-vontar-dq08.dtb#" -i /mnt/armbianEnv.txt
-losetup -D
+umount /mnt
+losetup -d \${DEVICE}
 mv rk3528-tvbox/armbian-build/output/images/*.img rk3528-tvbox/dq08.img
 EOF
 sudo bash rk3528-tvbox/add-dtb.sh
