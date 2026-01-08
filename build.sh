@@ -12,7 +12,8 @@ patch devicetree/orig/rk3528.dtsi < ../dt_i2c.patch
 cp ../uboot-new-gcc.patch armbian-patch/patch/u-boot/legacy/board_rk3528-tvbox
 
 if [ ! -e armbian-build ]; then
-  git clone --depth=1 https://github.com/armbian/build armbian-build
+  git clone https://github.com/armbian/build armbian-build
+  git -C armbian-build checkout 4648add1
 fi
 cp -R armbian-patch/* armbian-build/
 cd armbian-build
