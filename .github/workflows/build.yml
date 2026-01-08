@@ -54,9 +54,9 @@ jobs:
     - name: Clean disk
       run: |
         df -h
-        rm -rf rk3528-tvbox/armbian-build
+        sudo rm -rf rk3528-tvbox/armbian-build
         df -h
-        docker system prune -af --volumes
+        docker system prune -af --volumes || sudo docker system prune -af --volumes
         df -h
     - run: make zip
     - name: Upload recovery image
